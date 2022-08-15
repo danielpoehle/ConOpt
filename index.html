@@ -70,11 +70,12 @@
             <nav>
               <div class="nav nav-tabs" id="nav-tab" role="tablist">
                 <button class="nav-link active text-danger" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Vorgänge analysieren</button>
-                <button class="nav-link text-light" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">&nbsp;</button>
+                <button class="nav-link text-danger" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Muttersuche</button>
                 <button class="nav-link text-light" id="nav-mfb-tab" data-bs-toggle="tab" data-bs-target="#nav-mfb" type="button" role="tab" aria-controls="nav-mfb" aria-selected="false">&nbsp;</button>
                 <button class="nav-link text-light" id="nav-edit-tab" data-bs-toggle="tab" data-bs-target="#nav-edit" type="button" role="tab" aria-controls="nav-edit" aria-selected="false">&nbsp;</button>
               </div>
             </nav>
+
             <div class="tab-content" id="nav-tabContent">
               <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                 
@@ -130,6 +131,107 @@
                 </div>
     
               
+              </div>
+
+              <div class="tab-pane fade show" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="col-md-4 animate-show-hide ng-show" ng-show="optList.loadComplete">
+                  <table class="table table-borderless">
+                      <tr>
+                          <td>
+                              <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon3">Region</span>
+                                <input type="text" class="form-control " id="bob1" aria-describedby="basic-addon3" placeholder="Region" ng-model="optList.Region">
+                              </div>                        
+                          </td>
+                          <td>
+                            <div class="d-grid gap-2">  
+                              <button type="button" class="btn btn-secondary" ng-click="optList.findMother();">
+                                <i class="fas fa-crown"></i>
+                                &nbsp; Mütter finden
+                             </button>                           
+                            </div>                                           
+                          </td>
+                      </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-11 animate-show-hide ng-show" ng-show="optList.BETR.length > 0">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <h4>Hohe Betroffenheit Bau</h4>
+                      <table class="table table-striped">
+                        <thead>
+                          <tr class="table-primary">
+                            <th>Vorgang</th>
+                            <th>Anzahl Betroffenheit Bau</th>
+                            <th>&nbsp;</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="z in optList.BETR | orderBy:'-Anz'">
+                            <td>{{z.Vorgang}}</td>
+                            <td>{{z.Anz}}</td>
+                            <td>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
+                                <i class="fas fa-angle-double-left"></i>
+                             </button>  
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="col-md-4">
+                      <h4>Hohe Anzahl Züge</h4>
+                      <table class="table table-striped">
+                        <thead>
+                          <tr class="table-primary">
+                            <th>Vorgang</th>
+                            <th>Anzahl Zugnummern im Vorgang</th>
+                            <th>&nbsp;</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="z in optList.ZUEGE | orderBy:'-Anz'">
+                            <td>{{z.Vorgang}}</td>
+                            <td>{{z.Anz}}</td>
+                            <td>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
+                                <i class="fas fa-angle-double-left"></i>
+                             </button>  
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div class="col-md-4">
+                      <h4>Hohe Anzahl Verkehrstage</h4>
+                      <table class="table table-striped">
+                        <thead>
+                          <tr class="table-primary">
+                            <th>Vorgang</th>
+                            <th>Anzahl Tage Betroffenheit</th>
+                            <th>&nbsp;</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr ng-repeat="z in optList.VDAYS | orderBy:'-Anz'">
+                            <td>{{z.Vorgang}}</td>
+                            <td>{{z.Anz}}</td>
+                            <td>
+                              <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
+                                <i class="fas fa-angle-double-left"></i>
+                             </button>  
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>                  
+
+                </div>
+
               </div>
 
               

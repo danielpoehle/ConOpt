@@ -17,13 +17,20 @@
         optList.SavingsList = [];
         optList.sv = 0;
         optList.analyzed = false;
+        optList.Region = '';
+        optList.BETR = [];
+        optList.ZUEGE = [];
+        optList.VDAYS = [];
         
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         optList.fromDate = new Date().toLocaleDateString('de-DE', options);   
         
         optList.analyzeTrains = function(){
             optList.analyzed = false;
-            if(optList.BOB1 === '' || optList.BOB2 === ''){ return;}
+            optList.SavingsList = [];
+            optList.sv = 0;
+            if(optList.BOB1 === ''){ return;}
+            if(optList.BOB2 === ''){ return;}
             let b1 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB1);
             let b2 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB2);
 
@@ -33,9 +40,8 @@
             nr2 = nr2.filter((item, index) => nr2.indexOf(item)===index);
 
             const intersectNumbers = nr1.filter(value => nr2.includes(value));
-
-            optList.SavingsList = [];
-            optList.sv = 0;
+            
+            
             for (let i = 0; i < intersectNumbers.length; i+=1) {
                 //t1 is mother
                 let t1 = b1.filter((t) => t.Zugnummer === intersectNumbers[i]).map((t) => t.Verkehrstag.VText);
@@ -61,6 +67,50 @@
             console.log(optList.SavingsList);
             console.log(intersectNumbers);
             optList.analyzed = true;
+        };
+
+        optList.findMother = function(){
+            optList.BETR = [];
+            optList.ZUEGE = [];
+            optList.VDAYS = [];
+            if(optList.Region === ''){return;}
+            let b = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t['RB Fpl'] === optList.Region);
+            if(b.length <= 0){return;}
+
+            let vg = b.map((t) => t.Vorgangsnummer);
+            vg = vg.filter((item, index) => vg.indexOf(item)===index);
+
+            for (let i = 0; i < vg.length; i+=1) {
+                let tmp = b.filter((t) => t.Vorgangsnummer === vg[i]);
+
+                let znr = tmp.map((t) => t.Zugnummer);
+                znr = znr.filter((item, index) => znr.indexOf(item)===index);
+
+                let vd = tmp.map((t) => t.Verkehrstag.VText);
+                vd = vd.filter((item, index) => vd.indexOf(item)===index);
+
+                optList.BETR.push({
+                    'Vorgang': vg[i],
+                    'Anz': tmp.length
+                });
+
+                optList.ZUEGE.push({
+                    'Vorgang': vg[i],
+                    'Anz': znr.length
+                });
+
+                optList.VDAYS.push({
+                    'Vorgang': vg[i],
+                    'Anz': vd.length
+                });
+            }
+        };
+
+        optList.selectMother = function(vg){
+            optList.BOB1 = vg; //mother
+            optList.BOB2 = ''; //daughter
+            optList.analyzeTrains();
+            document.getElementById("nav-home-tab").click();
         };
 
 
