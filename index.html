@@ -104,8 +104,12 @@
                   </table>
                 </div>
 
+                <div class="col-md-8 animate-show-hide ng-show" ng-show="optList.analyzed && optList.SavingsList.length === 0">
+                  <h4 class="text-danger">Keine Ersparnis durch Bündelung von Vorgang {{optList.BOB1}} mit {{optList.BOB2}}</h4>
+                </div>
+
                 <div class="col-md-8 animate-show-hide ng-show" ng-show="optList.SavingsList.length > 0">
-                  <h4>Gesamtersparnis Bündelung: {{optList.sv}} Betroffenheiten Bau</h4>
+                  <h4 class="text-primary">Gesamtersparnis Bündelung: {{optList.sv}} Betroffenheiten Bau</h4>
                   <table class="table table-striped">
                     <thead>
                       <tr class="table-primary">

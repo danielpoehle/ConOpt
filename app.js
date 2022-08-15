@@ -16,11 +16,14 @@
         optList.Trains = [];
         optList.SavingsList = [];
         optList.sv = 0;
+        optList.analyzed = false;
         
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         optList.fromDate = new Date().toLocaleDateString('de-DE', options);   
         
         optList.analyzeTrains = function(){
+            optList.analyzed = false;
+            if(optList.BOB1 === '' || optList.BOB2 === ''){ return;}
             let b1 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB1);
             let b2 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB2);
 
@@ -42,18 +45,22 @@
                 t2 = t2.filter((item, index) => t2.indexOf(item)===index);
                 
                 let saving = t2.filter((t) => !t1.includes(t));
-                optList.sv += saving.length;
-                optList.SavingsList.push({
-                    'ZNR': intersectNumbers[i],
-                    'Savings': saving.length,
-                    'Days': saving.join(', ')
-                });                
+                if(saving.length > 0){
+                    optList.sv += saving.length;
+                    optList.SavingsList.push({
+                      'ZNR': intersectNumbers[i],
+                      'Savings': saving.length,
+                      'Days': saving.join(', ')
+                    });
+                }
+                                
             }
 
-            //console.log(b1);
-            //console.log(b2);
+            console.log(b1);
+            console.log(b2);
             console.log(optList.SavingsList);
             console.log(intersectNumbers);
+            optList.analyzed = true;
         };
 
 
