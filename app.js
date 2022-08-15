@@ -11,10 +11,50 @@
         
         optList.Filename = 'bla';
         optList.loadComplete = false;
+        optList.BOB1 = ''; //mother
+        optList.BOB2 = ''; //daughter
         optList.Trains = [];
+        optList.SavingsList = [];
+        optList.sv = 0;
         
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        optList.fromDate = new Date().toLocaleDateString('de-DE', options);      
+        optList.fromDate = new Date().toLocaleDateString('de-DE', options);   
+        
+        optList.analyzeTrains = function(){
+            let b1 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB1);
+            let b2 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB2);
+
+            let nr1 = b1.map((t) => t.Zugnummer);
+            nr1 = nr1.filter((item, index) => nr1.indexOf(item)===index);
+            let nr2 = b2.map((t) => t.Zugnummer);
+            nr2 = nr2.filter((item, index) => nr2.indexOf(item)===index);
+
+            const intersectNumbers = nr1.filter(value => nr2.includes(value));
+
+            optList.SavingsList = [];
+            optList.sv = 0;
+            for (let i = 0; i < intersectNumbers.length; i+=1) {
+                //t1 is mother
+                let t1 = b1.filter((t) => t.Zugnummer === intersectNumbers[i]).map((t) => t.Verkehrstag.VText);
+                t1 = t1.filter((item, index) => t1.indexOf(item)===index);
+                //t2 is daughter
+                let t2 = b2.filter((t) => t.Zugnummer === intersectNumbers[i]).map((t) => t.Verkehrstag.VText);
+                t2 = t2.filter((item, index) => t2.indexOf(item)===index);
+                
+                let saving = t2.filter((t) => !t1.includes(t));
+                optList.sv += saving.length;
+                optList.SavingsList.push({
+                    'ZNR': intersectNumbers[i],
+                    'Savings': saving.length,
+                    'Days': saving.join(', ')
+                });                
+            }
+
+            //console.log(b1);
+            //console.log(b2);
+            console.log(optList.SavingsList);
+            console.log(intersectNumbers);
+        };
 
 
 

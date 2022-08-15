@@ -54,10 +54,10 @@
               
               <div class="col-md-8">
                 
-                <input type="file" id="list" class="form-control form-control-lg" ng-model="optList.Filename" accept=".csv" placeholder="Liste auswählen"> <p></p>
+                <input type="file" id="list" class="form-control" ng-model="optList.Filename" accept=".csv" placeholder="Liste auswählen"> <p></p>
                 <p><b>Achtung</b> Es werden keinerlei Daten ins Netz hochgeladen. Der Verarbeitung der Daten und Erzeugung der Tabelle erfolgt ausschließlich auf dem lokalen Rechner.</p>
   
-                <button type="button" class="btn btn-secondary btn-lg" ng-click="optList.readAndConvertFile();">
+                <button type="button" class="btn btn-secondary" ng-click="optList.readAndConvertFile();">
                     <i class="far fa-file-alt"></i>                    
                     Daten einlesen und verarbeiten
                 </button>
@@ -82,13 +82,13 @@
                       <tr>
                           <td>
                               <div class="input-group mb-3">
-                                <span class="input-group-text" id="basic-addon3">BOB-Vorgang 1</span>
+                                <span class="input-group-text" id="basic-addon3">BOB-Vorgang Mutter</span>
                                 <input type="text" class="form-control " id="bob1" aria-describedby="basic-addon3" placeholder="Vorgangsnummer" ng-model="optList.BOB1">
                               </div>                        
                           </td>
                           <td>
                             <div class="input-group mb-3">
-                              <span class="input-group-text" id="basic-addon4">BOB-Vorgang 2</span>
+                              <span class="input-group-text" id="basic-addon4">BOB-Vorgang Tochter</span>
                               <input type="text" class="form-control " id="bob2" aria-describedby="basic-addon4" placeholder="Vorgangsnummer" ng-model="optList.BOB2">
                             </div>                       
                           </td>
@@ -101,6 +101,26 @@
                             </div>                                           
                           </td>
                       </tr>
+                  </table>
+                </div>
+
+                <div class="col-md-8 animate-show-hide ng-show" ng-show="optList.SavingsList.length > 0">
+                  <h4>Gesamtersparnis Bündelung: {{optList.sv}} Betroffenheiten Bau</h4>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr class="table-primary">
+                        <th>Zugnummer</th>
+                        <th>Ersparnis je Zug</th>
+                        <th>Gebündelte Tage aus Vorgang {{optList.BOB2}}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="z in optList.SavingsList">
+                        <td>{{z.ZNR}}</td>
+                        <td>{{z.Savings}}</td>
+                        <td>{{z.Days}}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 </div>
     
