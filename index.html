@@ -134,7 +134,31 @@
               </div>
 
               <div class="tab-pane fade show" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
-                <div class="col-md-4 animate-show-hide ng-show" ng-show="optList.loadComplete">
+                <div class="col-md-9 ng-hide animate-show-hide" ng-show="optList.loadComplete && !optList.loadVzG">
+                  <table class="table table-boderless">
+                    <tr>
+                      <td>
+                        <div class="form-group">
+        
+                    
+                          <div class="col-md-8">
+                            
+                            <input type="file" id="vzg" class="form-control" ng-model="optList.Filename" accept=".csv" placeholder="Liste auswählen"> <p></p>
+                            <p><b>Achtung</b> Es werden keinerlei Daten ins Netz hochgeladen. Der Verarbeitung der Daten und Erzeugung der Tabelle erfolgt ausschließlich auf dem lokalen Rechner.</p>
+              
+                            <button type="button" class="btn btn-secondary" ng-click="optList.readVzG();">
+                              <i class="fas fa-road"></i>                   
+                                VzG-Daten einlesen und verarbeiten
+                            </button>
+                          </div>         
+                        </div>
+                      </td>
+                    </tr>                    
+                  </table>
+                  
+                </div>
+
+                <div class="col-md-4 animate-show-hide ng-show" ng-show="optList.loadComplete && optList.loadVzG">
                   <table class="table table-borderless">
                       <tr>
                           <td>
@@ -145,13 +169,29 @@
                           </td>
                           <td>
                             <div class="d-grid gap-2">  
-                              <button type="button" class="btn btn-secondary" ng-click="optList.findMother();">
+                              <button type="button" class="btn btn-secondary" ng-click="optList.findMother('Region');">
                                 <i class="fas fa-crown"></i>
                                 &nbsp; Mütter finden
                              </button>                           
                             </div>                                           
                           </td>
                       </tr>
+                      <tr>
+                        <td>
+                            <div class="input-group mb-3">
+                              <span class="input-group-text" id="basic-addon3">Strecke</span>
+                              <input type="text" class="form-control " id="bob2" aria-describedby="basic-addon3" placeholder="VzG-Nummer" ng-model="optList.Strecke">
+                            </div>                        
+                        </td>
+                        <td>
+                          <div class="d-grid gap-2">  
+                            <button type="button" class="btn btn-secondary" ng-click="optList.findMother('Strecke');">
+                              <i class="fas fa-crown"></i>
+                              &nbsp; Mütter finden
+                           </button>                           
+                          </div>                                           
+                        </td>
+                    </tr>
                   </table>
                 </div>
 

@@ -11,13 +11,16 @@
         
         optList.Filename = 'bla';
         optList.loadComplete = false;
+        optList.loadVzG = false;
         optList.BOB1 = ''; //mother
         optList.BOB2 = ''; //daughter
         optList.Trains = [];
+        optList.BOB = [];
         optList.SavingsList = [];
         optList.sv = 0;
         optList.analyzed = false;
         optList.Region = '';
+        optList.Strecke = '';
         optList.BETR = [];
         optList.ZUEGE = [];
         optList.VDAYS = [];
@@ -31,8 +34,8 @@
             optList.sv = 0;
             if(optList.BOB1 === ''){ return;}
             if(optList.BOB2 === ''){ return;}
-            let b1 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB1);
-            let b2 = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t.Vorgangsnummer === optList.BOB2);
+            let b1 = optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB1);
+            let b2 = optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB2);
 
             let nr1 = b1.map((t) => t.Zugnummer);
             nr1 = nr1.filter((item, index) => nr1.indexOf(item)===index);
@@ -69,12 +72,21 @@
             optList.analyzed = true;
         };
 
-        optList.findMother = function(){
+        optList.findMother = function(filt){
             optList.BETR = [];
             optList.ZUEGE = [];
-            optList.VDAYS = [];
-            if(optList.Region === ''){return;}
-            let b = optList.Trains.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall') && t['RB Fpl'] === optList.Region);
+            optList.VDAYS = [];            
+            let b = [];
+            if(filt === 'Region'){
+                if(optList.Region === ''){return;}
+                b = optList.Trains.filter((t) => t['RB Fpl'] === optList.Region);
+            }
+
+            if(filt === 'Strecke'){
+                if(optList.Strecke === ''){return;}
+                b = optList.Trains.filter((t) => t['VzG'] === optList.Strecke);
+            }
+            
             if(b.length <= 0){return;}
 
             let vg = b.map((t) => t.Vorgangsnummer);
@@ -111,6 +123,10 @@
             optList.BOB2 = ''; //daughter
             optList.analyzeTrains();
             document.getElementById("nav-home-tab").click();
+        };
+
+        optList.readVzG = function(){
+            console.log("click");
         };
 
 
@@ -165,7 +181,48 @@
 
         $(document).ready(function () {
             $('#list').bind('change', handleDialog);
+            $('#vzg').bind('change', handleVzG);
         });
+
+        function handleVzG(event){
+            const { files } = event.target;
+            const file = files[0];
+            
+            const reader = new FileReader();
+            reader.readAsText(file, 'ISO-8859-1');
+            reader.onload = function (event) {                
+                csv({
+                    output: "json",
+                    delimiter: ";"
+                })
+                .fromString(event.target.result)
+                .then(function(result){
+                    for (let i = 0; i < optList.BOB.length; i+= 1) {
+                        let tmp = result.findIndex((t) => t['BOB-Nummer'] === optList.BOB[i]); 
+                        if(tmp >= 0){
+                            optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB[i]).forEach((t) => {
+                                t.VzG = result[tmp]['Bau: VzG-Strecke'];
+                                t.Gewerk = result[tmp]['Gewerk'];
+                                t.Arbeiten = result[tmp]['Arbeiten'];
+                                t.BBR = result[tmp]['Regelungen: baubetriebl. R.[1]'];
+                            });
+                        }else{
+                            optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB[i]).forEach((t) => {
+                                t.VzG = 'NA';
+                                t.Gewerk = 'NA';
+                                t.Arbeiten = 'NA';
+                                t.BBR = 'NA';
+                            });
+                        }                                            
+                    }
+                    
+                    optList.loadVzG = true;
+                    console.log(optList.Trains.length);
+                    console.log(optList.Trains[0]);
+                })                
+                
+            };
+        };
 
         function handleDialog(event) {
             const { files } = event.target;
@@ -184,7 +241,9 @@
                         const vt = result[i].Verkehrstag; 
                         result[i].Verkehrstag = {'VText': vt, 'VNumber': luxon.DateTime.fromFormat(vt, 'dd.MM.yyyy').ts};                                               
                     }
-                    optList.Trains = result;
+                    optList.Trains = result.filter((t) => (t.Regelungsart === 'Umleitung' || t.Regelungsart === 'Ausfall'));
+                    optList.BOB = optList.Trains.map((t) => t.Vorgangsnummer);
+                    optList.BOB = optList.BOB.filter((item, index) => optList.BOB.indexOf(item)===index);
                     optList.loadComplete = true;
                     console.log(optList.Trains.length);
                     console.log(optList.Trains[0]);
