@@ -24,18 +24,29 @@
         optList.BETR = [];
         optList.ZUEGE = [];
         optList.VDAYS = [];
+        optList.totalCount = 0;
+        optList.trackList = [];
+        optList.optGain = 0;
         
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         optList.fromDate = new Date().toLocaleDateString('de-DE', options);   
         
-        optList.analyzeTrains = function(){
+        optList.analyzeTrains = function(bob1, bob2){
             optList.analyzed = false;
             optList.SavingsList = [];
             optList.sv = 0;
-            if(optList.BOB1 === ''){ return;}
-            if(optList.BOB2 === ''){ return;}
-            let b1 = optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB1);
-            let b2 = optList.Trains.filter((t) => t.Vorgangsnummer === optList.BOB2);
+            let ret = {
+                'gain': 0,
+                'svList': []
+            };
+            if(bob1 === ''){ 
+                console.log("Bob1 is empty");
+                return(ret);}
+            if(bob2 === ''){ 
+                console.log("Bob2 is empty");
+                return(ret);}
+            let b1 = optList.Trains.filter((t) => t.Vorgangsnummer === bob1);
+            let b2 = optList.Trains.filter((t) => t.Vorgangsnummer === bob2);
 
             let nr1 = b1.map((t) => t.Zugnummer);
             nr1 = nr1.filter((item, index) => nr1.indexOf(item)===index);
@@ -53,10 +64,20 @@
                 let t2 = b2.filter((t) => t.Zugnummer === intersectNumbers[i]).map((t) => t.Verkehrstag.VText);
                 t2 = t2.filter((item, index) => t2.indexOf(item)===index);
                 
-                let saving = t2.filter((t) => !t1.includes(t));
+                let exclusionDays = t2.filter((t) => !t1.includes(t));
+                let saving = [];
+
+                for (let j = 0; j < exclusionDays.length; j++) {
+                    if(optList.Trains.filter((t) => t.Zugnummer === intersectNumbers[i] && t.Verkehrstag.VText === exclusionDays[j]).length === 1)
+                    saving.push(exclusionDays[j]);                    
+                }
+
+                
+                
+
                 if(saving.length > 0){
-                    optList.sv += saving.length;
-                    optList.SavingsList.push({
+                    ret.gain += saving.length;
+                    ret.svList.push({
                       'ZNR': intersectNumbers[i],
                       'Savings': saving.length,
                       'Days': saving.join(', ')
@@ -65,11 +86,15 @@
                                 
             }
 
-            console.log(b1);
-            console.log(b2);
-            console.log(optList.SavingsList);
-            console.log(intersectNumbers);
-            optList.analyzed = true;
+            //console.log(b1);
+            //console.log(b2);
+            //console.log(optList.SavingsList);
+            //console.log(intersectNumbers);
+            optList.SavingsList = ret.svList;
+            optList.sv = ret.gain;
+            optList.analyzed = true;            
+            //console.log(ret);
+            return(ret);
         };
 
         optList.findMother = function(filt){
@@ -103,19 +128,37 @@
 
                 optList.BETR.push({
                     'Vorgang': vg[i],
-                    'Anz': tmp.length
+                    'Anz': tmp.length,
+                    'Strecke': tmp[0]['VzG']
                 });
 
                 optList.ZUEGE.push({
                     'Vorgang': vg[i],
-                    'Anz': znr.length
+                    'Anz': znr.length,
+                    'Strecke': tmp[0]['VzG']
                 });
 
                 optList.VDAYS.push({
                     'Vorgang': vg[i],
-                    'Anz': vd.length
-                });
+                    'Anz': vd.length,
+                    'Strecke': tmp[0]['VzG']
+                });                
             }
+            optList.countTrainsWithRestrictions(b);            
+        };
+
+        optList.countTrainsWithRestrictions = function(b){
+            let allDays = b.map((t) => t.Verkehrstag.VText);
+            allDays = allDays.filter((item, index) => allDays.indexOf(item)===index);
+            optList.totalCount = 0;
+
+                for (let j = 0; j < allDays.length; j+=1) {
+                    let tmp = b.filter((t) => t.Verkehrstag.VText === allDays[j]);
+
+                    let znr = tmp.map((t) => t.Zugnummer);
+                    znr = znr.filter((item, index) => znr.indexOf(item)===index);
+                    optList.totalCount += znr.length;
+                }
         };
 
         optList.selectMother = function(vg){
@@ -125,8 +168,95 @@
             document.getElementById("nav-home-tab").click();
         };
 
-        optList.readVzG = function(){
-            console.log("click");
+        optList.analyzeAllTracks = function(){
+            let allVzG = optList.Trains.map((t) => t.VzG);
+            allVzG = allVzG.filter((item, index) => allVzG.indexOf(item)===index);
+            optList.trackList = [];
+            optList.optGain = 0;
+
+            for (let i = 0; i < allVzG.length; i+=1) {
+                optList.Strecke = allVzG[i];
+                optList.findMother('Strecke');
+                
+
+                if(optList.BETR.length > 1){
+                    optList.BETR.sort((a, b) => b.Anz - a.Anz);
+                    optList.ZUEGE.sort((a, b) => b.Anz - a.Anz);
+                    optList.VDAYS.sort((a, b) => b.Anz - a.Anz);
+
+                    //first step: find mothers & daughters of the track number
+                    let mothers = [];
+                    if(optList.BETR.length <= 6){
+                        //only take one mother
+                        mothers.push(optList.VDAYS[0].Vorgang);                        
+                    }else{
+                        //select more than one mother
+                        let mo = optList.VDAYS.filter((t) => t.Anz >= 10).map((t) => t.Vorgang);
+                        mo.push(optList.VDAYS[0].Vorgang);
+                        mo.push(optList.BETR[0].Vorgang);
+                        mo.push(optList.ZUEGE[0].Vorgang);
+                        mo = mo.filter((item, index) => mo.indexOf(item)===index);
+                        mothers = mo;
+                    }
+
+                    let assignments = [];
+                    for (let a = 0; a < mothers.length; a+=1) {
+                        assignments.push({
+                            'mother': mothers[a],
+                            'daugthers': [],
+                            'gainSum': 0
+                        });                        
+                    }
+
+                    let daughters = optList.VDAYS.map((t) => t.Vorgang);
+                    daughters = daughters.filter((t) => !mothers.includes(t));
+                    
+                    for (let j = 0; j < daughters.length; j+=1) {
+                        let gain = 0;
+                        let bestMother = '';
+                        let saving = [];
+
+                        for (let k = 0; k < mothers.length; k+=1) {
+                            let result = optList.analyzeTrains(mothers[k], daughters[j]);
+                            //console.log(daughters[j], mothers[k], result);
+                            if(result.gain > gain){
+                                //console.log("found assignment");
+                                gain = result.gain;
+                                bestMother = mothers[k];
+                                saving = result.svList;
+                            }                            
+                        }
+                        if(gain > 0){
+                            let m = assignments.find((m) => m.mother === bestMother);
+                            m.daugthers.push({
+                                'daughter': daughters[j],
+                                'savingsList': saving,
+                                'gain': gain
+                            });
+                            m.gainSum += gain;
+                        }
+                    }
+                    //console.log(allVzG[i], assignments);   
+                    //only include mothers with at least one daughter with gain
+                    assignments = assignments.filter((a) => a.gainSum > 0); 
+                    //console.log(allVzG[i], assignments);                    
+
+                    if(assignments.length > 0){
+                        let totalSum = assignments.map((a) => a.gainSum).reduce((pv, cv) => pv + cv, 0);
+                        optList.trackList.push({
+                            'VzG': allVzG[i],
+                            'Assignments': assignments,
+                            'totalGain': totalSum
+                        });
+                    }
+                } 
+            }
+            optList.countTrainsWithRestrictions(optList.Trains);
+            optList.Strecke = '';
+            optList.analyzed = false;
+            optList.BETR = [];
+            optList.optGain = optList.trackList.map((a) => a.totalGain).reduce((pv, cv) => pv + cv, 0);
+            console.log(optList.trackList);
         };
 
 

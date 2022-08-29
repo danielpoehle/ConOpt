@@ -96,7 +96,7 @@
                           </td>
                           <td>
                             <div class="d-grid gap-2">  
-                              <button type="button" class="btn btn-secondary" ng-click="optList.analyzeTrains();">
+                              <button type="button" class="btn btn-secondary" ng-click="optList.analyzeTrains(optList.BOB1, optList.BOB2);">
                                 <i class="fas fa-search-minus"></i>
                                 Reduktion Züge zeigen
                              </button>                           
@@ -192,10 +192,22 @@
                           </div>                                           
                         </td>
                     </tr>
+                    <tr>
+                      <td>
+                        <div class="d-grid gap-2">  
+                          <button type="button" class="btn btn-secondary" ng-click="optList.analyzeAllTracks();">
+                            <i class="fas fa-crown"></i>
+                            &nbsp; Gesamtoptimierung Mutter-Tochter-Zuordnung
+                         </button>                           
+                        </div>                                           
+                      </td>
+                  </tr>
                   </table>
                 </div>
 
                 <div class="col-md-11 animate-show-hide ng-show" ng-show="optList.BETR.length > 0">
+                  <h4>Betroffenheit</h4>
+                  <p>Gesamte Anzahl Betroffenheit mit Ausfall / Umleitung: {{optList.totalCount}}</p>
                   <div class="row">
                     <div class="col-md-4">
                       <h4>Hohe Betroffenheit Bau</h4>
@@ -203,6 +215,7 @@
                         <thead>
                           <tr class="table-primary">
                             <th>Vorgang</th>
+                            <th>Strecke</th>
                             <th>Anzahl Betroffenheit Bau</th>
                             <th>&nbsp;</th>
                           </tr>
@@ -210,6 +223,7 @@
                         <tbody>
                           <tr ng-repeat="z in optList.BETR | orderBy:'-Anz'">
                             <td>{{z.Vorgang}}</td>
+                            <td>{{z.Strecke}}</td>
                             <td>{{z.Anz}}</td>
                             <td>
                               <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
@@ -227,6 +241,7 @@
                         <thead>
                           <tr class="table-primary">
                             <th>Vorgang</th>
+                            <th>Strecke</th>
                             <th>Anzahl Zugnummern im Vorgang</th>
                             <th>&nbsp;</th>
                           </tr>
@@ -234,6 +249,7 @@
                         <tbody>
                           <tr ng-repeat="z in optList.ZUEGE | orderBy:'-Anz'">
                             <td>{{z.Vorgang}}</td>
+                            <td>{{z.Strecke}}</td>
                             <td>{{z.Anz}}</td>
                             <td>
                               <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
@@ -251,6 +267,7 @@
                         <thead>
                           <tr class="table-primary">
                             <th>Vorgang</th>
+                            <th>Strecke</th>
                             <th>Anzahl Tage Betroffenheit</th>
                             <th>&nbsp;</th>
                           </tr>
@@ -258,6 +275,7 @@
                         <tbody>
                           <tr ng-repeat="z in optList.VDAYS | orderBy:'-Anz'">
                             <td>{{z.Vorgang}}</td>
+                            <td>{{z.Strecke}}</td>
                             <td>{{z.Anz}}</td>
                             <td>
                               <button type="button" class="btn btn-outline-secondary btn-sm" ng-click="optList.selectMother(z.Vorgang);">
@@ -270,6 +288,28 @@
                     </div>
                   </div>                  
 
+                </div>
+
+                <div class="col-md-11 animate-show-hide ng-show" ng-show="optList.trackList.length > 0">
+                  <h4>Einsparungen je Strecke</h4>
+                  <p>Gesamte Anzahl Betroffenheit mit Ausfall / Umleitung: {{optList.totalCount}}</p>
+                  <p>Gesamte Anzahl Einsparung Ausfall / Umleitung: {{optList.optGain}}, {{(100.0*optList.optGain / optList.totalCount).toFixed(2)}} %</p>
+                  <table class="table table-striped">
+                    <thead>
+                      <tr class="table-primary">                        
+                        <th>Strecke</th>
+                        <th>Einsparung</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr ng-repeat="z in optList.trackList | orderBy:'-totalGain'">
+                        <td>{{z.VzG}}</td>
+                        <td>{{z.totalGain}}</td>
+                        <td>{{z.Assignments}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
               </div>
