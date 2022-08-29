@@ -292,9 +292,12 @@
 
                 <div class="col-md-11 animate-show-hide ng-show" ng-show="optList.trackList.length > 0">
                   <h4>Einsparungen je Strecke</h4>
-                  <p>Gesamte Anzahl Betroffenheit mit Ausfall / Umleitung: {{optList.totalCount}}</p>
-                  <p>Gesamte Anzahl Einsparung Ausfall / Umleitung: {{optList.optGain}}, {{(100.0*optList.optGain / optList.totalCount).toFixed(2)}} %</p>
-                  <table class="table table-striped">
+                  <p>Gesamte Anzahl Betroffenheit mit Ausfall + Umleitung: {{optList.totalCount}}</p>
+                  <p>Gesamte Anzahl Einsparung Ausfall + Umleitung Gesamtnetz: {{optList.optGain}}, {{(100.0*optList.optGain / optList.totalCount).toFixed(2)}} %</p>
+                  <p>Gesamte Anzahl Einsparung nur Umleitung Gesamtnetz: {{optList.optReroute}}, {{(100.0*optList.optReroute / optList.totalCount).toFixed(2)}} %</p>
+                  <p>Gesamte Anzahl Einsparung Ausfall + Umleitung nur hA+ Netz: {{optList.optGainHAPlus}}</p>
+                  <p>Gesamte Anzahl Einsparung nur Umleitung nur hA+ Netz: {{optList.optRerouteHAPlus}}</p>
+                  <table class="table table-sm">
                     <thead>
                       <tr class="table-primary">                        
                         <th>Strecke</th>
@@ -305,8 +308,61 @@
                     <tbody>
                       <tr ng-repeat="z in optList.trackList | orderBy:'-totalGain'">
                         <td>{{z.VzG}}</td>
-                        <td>{{z.totalGain}}</td>
-                        <td>{{z.Assignments}}</td>
+                        <td>Gesamt {{z.totalGain}},<br> davon {{z.numSavedReroutes}} Umleitungen</td>
+                        <td>
+                          <table class="table table-sm">
+                            <thead>
+                              <tr class="table-secondary">
+                                <th>Mutter</th>
+                                <th>Ersparnis</th>
+                                <th>Töchter</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr ng-repeat="t in z.Assignments | orderBy:'-gainSum'">
+                                <td>{{t.mother}}</td>
+                                <td>Gesamt: {{t.gainSum}},<br> davon {{t.totalReroutes}} Umleitungen</td>
+                                <td>
+                                  <table class="table table-sm">
+                                    <thead>
+                                      <tr class="table-warning">
+                                        <th>Tochter</th>
+                                        <th>Ersparnis</th>
+                                        <th>Züge</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr ng-repeat="d in t.daugthers | orderBy:'-gain'">
+                                        <td>{{d.daughter}}</td>
+                                        <td>Gesamt {{d.gain}},<br> davon {{d.numReroute}} Umleitungen</td>
+                                        <td>
+                                          <table class="table table-striped table-sm">
+                                            <thead>
+                                              <tr>
+                                                <th>Zug</th>
+                                                <th>Ersparnis Ausfälle</th>
+                                                <th>Ersparnis Umleitung</th>
+                                                <th>Tage</th>
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              <tr ng-repeat="z in d.savingsList | orderBy:'-Savings'">
+                                                <td>{{z.ZNR}}</td>
+                                                <td>{{z.Cancels}}</td>
+                                                <td>{{z.Reroutes}}</td>
+                                                <td>{{z.Days}}</td>
+                                              </tr>
+                                            </tbody>
+                                          </table>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </td>                        
                       </tr>
                     </tbody>
                   </table>
